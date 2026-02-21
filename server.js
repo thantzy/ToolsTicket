@@ -7,7 +7,7 @@ const path = require('path');
 const app = express();
 app.use(express.json());
 
-const DB_FILE = './database.json';
+const DB_FILE = '/tmp/database.json';
 
 // --- DATABASE LOGIC ---
 function readDB() {
@@ -435,4 +435,5 @@ app.post('/api/save-config', async (req, res) => {
 });
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`🌐 Dashboard: http://localhost:${PORT}`));
+
 client.login(TOKEN);
