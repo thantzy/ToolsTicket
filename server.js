@@ -438,5 +438,14 @@ app.post('/api/save-config', async (req, res) => {
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`🌐 Dashboard: http://localhost:${PORT}`));
 
-client.login(TOKEN);
+const startBot = async () => {
+    try {
+        await client.login(TOKEN);
+        const PORT = process.env.PORT || 3000;
+        app.listen(PORT, () => console.log(`🚀 Server ready on port ${PORT}`));
+    } catch (err) {
+        console.error("❌ Gagal login ke Discord:", err.message);
+    }
+};
 
+startBot();
