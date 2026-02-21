@@ -5,6 +5,8 @@ const fs = require('fs');
 const path = require('path');
 
 const app = express();
+const cors = require('cors');
+app.use(cors());
 app.use(express.json());
 
 const DB_FILE = '/tmp/database.json';
@@ -437,3 +439,4 @@ const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`🌐 Dashboard: http://localhost:${PORT}`));
 
 client.login(TOKEN);
+
