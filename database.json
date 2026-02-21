@@ -1,0 +1,87 @@
+{
+  "guilds": {
+    "1339739723693948989": {
+      "channelId": "1427284984665739396",
+      "categoryId": "1427284736060948593",
+      "options": [
+        {
+          "type": "support",
+          "label": "Support",
+          "value": "support",
+          "question": "Butuh Bantuan Apa",
+          "transcriptId": "1457969676154835106"
+        },
+        {
+          "type": "purchase",
+          "label": "Purchase",
+          "value": "purchase",
+          "question": "Beli Berapa Key",
+          "transcriptId": "1457969676154835106"
+        },
+        {
+          "type": "giveaway",
+          "label": "Giveaway",
+          "value": "giveaway",
+          "question": "Proof",
+          "transcriptId": "1457969676154835106"
+        }
+      ],
+      "panel": {
+        "title": "ThanHUB Still Top 1",
+        "desc": "HALO ANAK ANAK BANGSAT, GOKILLLL JUGA MENNNN",
+        "image": ""
+      },
+      "ticketCount": 5
+    },
+    "1340293733727342664": {
+      "categoryId": "1340293602668187719",
+      "logChannelId": "1473851783263817789",
+      "options": [
+        {
+          "label": "Topup",
+          "value": "topup",
+          "transcriptId": "1473851783263817789",
+          "question": "Beli apa",
+          "description": "Klik untuk kategori Topup",
+          "emoji": "🎫"
+        }
+      ]
+    }
+  },
+  "staffStats": {
+    "897776573128781825": {
+      "name": "thanzxz.",
+      "isStaff": true,
+      "count": 2,
+      "tickets": 8,
+      "points": 2
+    },
+    "1192467938192654450": {
+      "name": "zannley",
+      "isStaff": true,
+      "tickets": 1,
+      "points": 0
+    },
+    "879616865855500309": {
+      "points": 0,
+      "isStaff": true,
+      "name": "ndra13."
+    },
+    "1026351230508871731": {
+      "points": 1,
+      "isStaff": true,
+      "name": "satria51_"
+    },
+    "899889619116650516": {
+      "points": 1,
+      "name": "sufferinginbss"
+    },
+    "243710550914105345": {
+      "points": 1,
+      "name": "chimp_id1"
+    }
+  },
+  "history": {
+    "2026-02-21": 28
+  }
+}

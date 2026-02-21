@@ -1,0 +1,641 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>THAN HUB | Premium Control</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --primary: #6366f1;
+            --secondary: #ec4899;
+            --accent: #06b6d4;
+            --bg-deep: #020205;
+        }
+
+        body { 
+            font-family: 'Plus Jakarta Sans', sans-serif; 
+            background-color: var(--bg-deep);
+            color: #f1f5f9;
+            overflow: hidden;
+        }
+
+        /* Glassmorphism Ultra */
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(25px) saturate(180%);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        }
+
+        .cyber-card {
+            background: linear-gradient(145deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.01) 100%);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 1.5rem;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .cyber-card:hover {
+            border-color: var(--primary);
+            background: rgba(99, 102, 241, 0.05);
+            transform: translateY(-8px) scale(1.01);
+            box-shadow: 0 20px 40px -20px rgba(99, 102, 241, 0.4);
+        }
+
+        /* Animated Background */
+        .mesh-bg {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            z-index: -2;
+            background: 
+                radial-gradient(circle at 10% 10%, rgba(99, 102, 241, 0.15) 0%, transparent 40%),
+                radial-gradient(circle at 90% 90%, rgba(236, 72, 153, 0.1) 0%, transparent 40%),
+                linear-gradient(180deg, #020205 0%, #050508 100%);
+        }
+
+        #starsCanvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        .floating-input {
+            background: rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 0.75rem;
+            font-family: 'JetBrains Mono', monospace;
+            transition: all 0.3s;
+        }
+
+        .floating-input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1);
+            background: rgba(0,0,0,0.4);
+        }
+
+        .nav-link {
+            position: relative;
+            transition: all 0.3s;
+        }
+
+        .nav-link.active {
+            color: white;
+            background: rgba(99, 102, 241, 0.1);
+        }
+
+        .nav-link.active::after {
+            content: '';
+            position: absolute;
+            left: 0; top: 25%; height: 50%; width: 4px;
+            background: var(--primary);
+            border-radius: 0 4px 4px 0;
+            box-shadow: 0 0 15px var(--primary);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            box-shadow: 0 10px 20px -10px rgba(99, 102, 241, 0.5);
+            transition: all 0.3s;
+        }
+
+        .btn-primary:hover {
+            filter: brightness(1.2);
+            transform: translateY(-2px);
+            box-shadow: 0 15px 30px -10px rgba(99, 102, 241, 0.6);
+        }
+
+        .custom-scroll::-webkit-scrollbar { width: 5px; }
+        .custom-scroll::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }
+
+        @keyframes fadeInScale {
+            from { opacity: 0; transform: scale(0.98) translateY(10px); }
+            to { opacity: 1; transform: scale(1) translateY(0); }
+        }
+        .animate-view { animation: fadeInScale 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+
+        @keyframes status-glow {
+            0%, 100% { box-shadow: 0 0 10px rgba(34, 197, 94, 0.2); opacity: 1; }
+            50% { box-shadow: 0 0 20px rgba(34, 197, 94, 0.6); opacity: 0.8; }
+        }
+        .animate-status { animation: status-glow 2s infinite ease-in-out; }
+
+        .rank-number {
+            font-family: 'JetBrains Mono', monospace;
+            font-style: italic;
+            background: linear-gradient(180deg, #6366f1, #ec4899);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        @keyframes shine {
+            from { transform: translateX(-100%) rotate(45deg); }
+            to { transform: translateX(200%) rotate(45deg); }
+        }
+
+        .premium-glow {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .premium-glow::after {
+            content: '';
+            position: absolute;
+            top: -50%; left: -50%; width: 200%; height: 200%;
+            background: linear-gradient(rgba(255,255,255,0), rgba(255,255,255,0.1), rgba(255,255,255,0));
+            transform: rotate(45deg);
+            animation: shine 4s infinite;
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .stagger-item {
+            animation: slideUp 0.5s ease forwards;
+            opacity: 0;
+        }
+    </style>
+</head>
+<body class="flex h-screen overflow-hidden">
+    <div class="mesh-bg"></div>
+    <canvas id="starsCanvas"></canvas>
+
+<aside id="sidebar" class="w-72 flex flex-col border-r border-white/5 glass-panel z-50 transition-all duration-300 ease-in-out relative">
+    <button onclick="toggleSidebar()" class="absolute -right-3 top-10 bg-indigo-500 text-white rounded-full p-1 shadow-lg hover:scale-110 transition-transform z-[60]">
+        <svg id="toggleIcon" class="w-4 h-4 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+        </svg>
+    </button>
+
+    <div class="p-8 flex items-center gap-4 overflow-hidden whitespace-nowrap">
+        <div class="min-w-[40px] h-10 bg-indigo-500 rounded-xl flex items-center justify-center shadow-[0_0_20px_rgba(99,102,241,0.5)]">
+            <span class="text-white font-black text-xl">T</span>
+        </div>
+        <div class="sidebar-text transition-opacity duration-300">
+            <h2 class="text-lg font-extrabold tracking-tighter">THAN HUB</h2>
+            <p class="text-[9px] text-gray-500 uppercase tracking-widest font-bold">V2.0 Core Interface</p>
+        </div>
+    </div>
+    
+    <nav class="flex-1 px-4 space-y-2 mt-8 overflow-hidden">
+        <button onclick="showTab(event, 'manage')" class="nav-link active flex items-center w-full gap-4 px-4 py-4 rounded-xl text-gray-400 font-bold transition-colors">
+            <svg class="min-w-[20px] w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z"></path>
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z"></path>
+            </svg>
+            <span class="sidebar-text text-sm whitespace-nowrap transition-opacity duration-300">Dashboard</span>
+        </button>
+
+        <button onclick="showTab(event, 'leaderboard')" class="nav-link flex items-center w-full gap-4 px-4 py-4 rounded-xl text-gray-400 font-bold transition-colors">
+            <svg class="min-w-[20px] w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"></path>
+            </svg>
+            <span class="sidebar-text text-sm whitespace-nowrap transition-opacity duration-300">Staff Elite</span>
+        </button>
+
+        <button onclick="showTab(event, 'statistic')" class="nav-link flex items-center w-full gap-4 px-4 py-4 rounded-xl text-gray-400 font-bold transition-colors">
+            <svg class="min-w-[20px] w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path>
+            </svg>
+            <span class="sidebar-text text-sm whitespace-nowrap transition-opacity duration-300">Analytics</span>
+        </button>
+    </nav>
+</aside>
+
+    <main class="flex-1 overflow-y-auto custom-scroll p-6 lg:p-12">
+<header class="mb-10 flex flex-col md:flex-row md:items-center justify-between gap-4">
+    <div>
+        <h1 id="page-title" class="text-3xl font-extrabold text-white tracking-tight">Configuration Dashboard</h1>
+        <p id="current-date" class="text-gray-500 font-medium text-sm mt-1"></p>
+    </div>
+    </header>
+
+<div id="manage" class="tab-content space-y-6 animate-view">
+    
+    <div class="cyber-card p-8">
+        <div class="flex items-center gap-3 mb-6">
+            <div class="w-2 h-6 bg-indigo-500 rounded-full"></div>
+            <h3 class="text-xl font-bold text-white">Main Panel Appearance</h3>
+        </div>
+        
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div class="md:col-span-1 space-y-2">
+                <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest">Panel Title</label>
+                <div class="relative">
+                    <span class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 text-xs">📝</span>
+                    <input type="text" id="panelTitle" class="floating-input w-full pl-10 pr-4 py-3 text-xs text-white" placeholder="🛒 THAN HUB | Premium Area">
+                </div>
+            </div>
+
+            <div class="md:col-span-2 space-y-2">
+                <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest">Panel Banner URL</label>
+                <div class="relative">
+                    <span class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 text-xs">🖼️</span>
+                    <input type="text" id="panelImage" class="floating-input w-full pl-10 pr-4 py-3 text-xs text-indigo-400" placeholder="https://imgur.com/your-image.png">
+                </div>
+            </div>
+
+            <div class="col-span-full space-y-2">
+                <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest">Panel Description</label>
+                <textarea id="panelDesc" class="floating-input w-full px-4 py-3 text-xs text-gray-300 min-h-[120px] resize-none" placeholder="Tulis deskripsi panel yang akan muncul di Discord..."></textarea>
+                <p class="text-[10px] text-gray-600 italic">Support markdown: **bold**, __underline__, etc.</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div class="cyber-card p-6 border-l-4 border-l-indigo-500/50">
+            <label class="text-[10px] font-bold text-gray-400 uppercase tracking-widest block mb-2">Guild Identifier</label>
+            <input type="text" id="guildId" class="floating-input w-full px-4 py-3 text-indigo-400 text-xs font-mono" placeholder="000000000000000000">
+        </div>
+        <div class="cyber-card p-6 border-l-4 border-l-pink-500/50">
+            <label class="text-[10px] font-bold text-gray-400 uppercase tracking-widest block mb-2">Ticket Portal ID</label>
+            <input type="text" id="channelId" class="floating-input w-full px-4 py-3 text-indigo-400 text-xs font-mono" placeholder="000000000000000000">
+        </div>
+        <div class="cyber-card p-6 border-l-4 border-l-cyan-500/50">
+            <label class="text-[10px] font-bold text-gray-400 uppercase tracking-widest block mb-2">Primary Category ID</label>
+            <input type="text" id="categoryId" class="floating-input w-full px-4 py-3 text-indigo-400 text-xs font-mono" placeholder="000000000000000000">
+        </div>
+    </div>
+
+    <div class="cyber-card p-8">
+        <div class="flex items-center justify-between mb-8">
+            <div>
+                <h3 class="text-xl font-bold text-white">Interaction Modules</h3>
+                <p class="text-gray-500 text-[10px] uppercase tracking-widest mt-1 font-semibold">Automated Categories & Log Transcripts</p>
+            </div>
+            <button onclick="addOpt()" class="group flex items-center gap-2 px-5 py-2.5 bg-indigo-500/10 text-indigo-400 hover:bg-indigo-500 hover:text-white rounded-xl text-xs font-black transition-all border border-indigo-500/20">
+                <span class="text-lg group-hover:rotate-90 transition-transform">+</span>
+                ADD NEW MODULE
+            </button>
+        </div>
+        
+        <div id="opts" class="space-y-4"></div>
+
+        <div class="mt-12 flex flex-col items-center gap-4">
+            <button onclick="save()" id="saveBtn" class="btn-primary px-16 py-4 rounded-2xl font-black text-sm tracking-[0.2em] uppercase">
+                🚀 Deploy Configuration
+            </button>
+            <span class="text-[10px] text-gray-600 uppercase font-bold tracking-widest">Changes will be reflected instantly in the Discord server</span>
+        </div>
+    </div>
+</div>
+
+        <div id="leaderboard" class="tab-content hidden animate-view">
+            <div id="podium" class="flex flex-col md:flex-row items-end justify-center gap-6 mb-12 pt-10"></div>
+            <div class="cyber-card overflow-hidden">
+                <div class="p-6 border-b border-white/5 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                    <h3 class="text-sm font-black uppercase tracking-widest text-indigo-400">Elite Performance Ranks</h3>
+                    <input type="text" onkeyup="filterStaff(this)" class="floating-input px-4 py-2 text-xs w-full md:w-64" placeholder="Search operative...">
+                </div>
+                <div id="staffList" class="divide-y divide-white/5"></div>
+            </div>
+        </div>
+
+        <div id="statistic" class="tab-content hidden animate-view">
+            <div class="cyber-card p-8">
+                <div class="mb-6">
+                    <h3 class="text-lg font-bold text-white">Activity Pulse</h3>
+                    <p class="text-gray-500 text-xs uppercase tracking-widest font-bold">Ticket Volume / 7 Days</p>
+                </div>
+                <div class="h-[400px]">
+                    <canvas id="growthChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // --- STARFIELD ANIMATION LOGIC ---
+        const canvas = document.getElementById('starsCanvas');
+        const ctx = canvas.getContext('2d');
+        let stars = [];
+        const starCount = window.innerWidth < 768 ? 75 : 150;
+
+        function resize() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+
+        class Star {
+            constructor() { this.reset(); }
+            reset() {
+                this.x = Math.random() * canvas.width;
+                this.y = Math.random() * canvas.height;
+                this.size = Math.random() * 1.5;
+                this.speedX = (Math.random() - 0.5) * 0.15;
+                this.speedY = (Math.random() - 0.5) * 0.15;
+                this.opacity = Math.random();
+                this.fade = Math.random() * 0.02;
+            }
+            update() {
+                this.x += this.speedX;
+                this.y += this.speedY;
+                if (this.x < 0 || this.x > canvas.width || this.y < 0 || this.y > canvas.height) this.reset();
+            }
+            draw() {
+                ctx.fillStyle = `rgba(255, 255, 255, ${this.opacity})`;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+
+        function initStars() {
+            stars = [];
+            for (let i = 0; i < starCount; i++) stars.push(new Star());
+        }
+
+        function animateStars() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            stars.forEach(s => { s.update(); s.draw(); });
+            requestAnimationFrame(animateStars);
+        }
+
+        window.addEventListener('resize', () => { resize(); initStars(); });
+        resize(); initStars(); animateStars();
+
+        // --- DASHBOARD LOGIC ---
+        let myChart;
+        let chartData = { labels: [], points: [] };
+        let fullStaffList = [];
+
+        document.getElementById('current-date').innerText = new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' });
+
+function addOpt(data = {}) {
+    const div = document.createElement('div');
+    div.className = 'group relative glass-panel p-6 rounded-2xl border-white/10 hover:border-indigo-500/50 transition-all animate-view';
+    
+    // Default type ke 'support' jika data baru
+    const currentType = data.type || 'support';
+
+    div.innerHTML = `
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
+            <div class="space-y-2">
+                <label class="text-[9px] font-black text-gray-500 uppercase tracking-widest">Module Type</label>
+                <select class="type-select w-full px-4 py-2.5 floating-input text-xs font-bold text-indigo-400 appearance-none cursor-pointer">
+                    <option value="purchase" ${currentType === 'purchase' ? 'selected' : ''}>🛒 Purchase</option>
+                    <option value="giveaway" ${currentType === 'giveaway' ? 'selected' : ''}>🎉 Giveaway</option>
+                    <option value="support" ${currentType === 'support' ? 'selected' : ''}>🛠️ Support/Help</option>
+                </select>
+            </div>
+            <div class="space-y-2">
+                <label class="text-[9px] font-black text-gray-500 uppercase tracking-widest">Display Name</label>
+                <input type="text" class="label w-full px-4 py-2.5 floating-input text-xs font-bold text-white" value="${data.label || ''}" placeholder="e.g. Order Premium">
+            </div>
+            <div class="space-y-2">
+                <label class="text-[9px] font-black text-gray-500 uppercase tracking-widest">Unique Value</label>
+                <input type="text" class="value w-full px-4 py-2.5 floating-input text-xs font-mono text-pink-400" value="${data.value || ''}" placeholder="order_premium">
+            </div>
+            <div class="space-y-2">
+                <label class="text-[9px] font-black text-gray-500 uppercase tracking-widest">Modal Question</label>
+                <input type="text" class="ques w-full px-4 py-2.5 floating-input text-xs text-gray-300" value="${data.question || ''}" placeholder="What do you want to buy?">
+            </div>
+            <div class="space-y-2">
+                <label class="text-[9px] font-black text-indigo-400 uppercase tracking-widest">Log Channel ID</label>
+                <input type="text" class="transcriptId w-full px-4 py-2.5 floating-input text-xs font-mono text-indigo-300 border-indigo-500/30" value="${data.transcriptId || ''}" placeholder="000...000">
+            </div>
+        </div>
+        <button onclick="this.parentElement.remove()" class="absolute -top-2 -right-2 bg-red-500 text-white w-6 h-6 rounded-lg text-[10px] flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all shadow-lg hover:scale-110">✕</button>`;
+    document.getElementById('opts').appendChild(div);
+}
+
+async function loadData() {
+    try {
+        const res = await fetch('/api/stats');
+        const data = await res.json();
+        
+        // Load data dasar
+        document.getElementById('guildId').value = data.firstGuildId || '';
+        document.getElementById('channelId').value = data.config?.channelId || '';
+        document.getElementById('categoryId').value = data.config?.categoryId || '';
+        
+        // --- TAMBAHKAN INI: Load data panel ---
+        document.getElementById('panelTitle').value = data.config?.panel?.title || '';
+        document.getElementById('panelDesc').value = data.config?.panel?.desc || '';
+        document.getElementById('panelImage').value = data.config?.panel?.image || '';
+
+        const optsDiv = document.getElementById('opts');
+        optsDiv.innerHTML = '';
+        (data.config?.options || []).forEach(opt => addOpt(opt));
+        
+        // Load Staff & Charts
+        fullStaffList = data.staffList || [];
+        renderLeaderboard(fullStaffList);
+        chartData.labels = data.labels || [];
+        chartData.points = data.dataPoints || [];
+    } catch (e) { 
+        console.warn("Demo Mode Enabled"); 
+    }
+}
+
+        function showTab(e, id) {
+            document.querySelectorAll('.tab-content').forEach(t => t.classList.add('hidden'));
+            document.querySelectorAll('.nav-link').forEach(n => n.classList.remove('active'));
+            document.getElementById(id).classList.remove('hidden');
+            e.currentTarget.classList.add('active');
+            if (id === 'statistic') setTimeout(() => refreshChart(chartData.labels, chartData.points), 100);
+        }
+
+        function renderLeaderboard(list) {
+            const podiumEl = document.getElementById('podium');
+            const listEl = document.getElementById('staffList');
+            podiumEl.innerHTML = ''; listEl.innerHTML = '';
+            
+            if (!list || list.length === 0) return;
+            
+            const top3 = list.slice(0, 3);
+            const order = [1, 0, 2]; 
+            
+            order.forEach(idx => {
+                if(!top3[idx]) return;
+                const rank = idx + 1;
+                const isFirst = rank === 1;
+                const height = isFirst ? 'h-64' : (rank === 2 ? 'h-52' : 'h-44');
+                const borderColor = isFirst ? 'border-indigo-500/50' : 'border-white/10';
+                
+                podiumEl.innerHTML += `
+                    <div class="flex flex-col items-center flex-1 max-w-[240px] animate-view">
+                        <div class="relative z-10 -mb-8">
+                            <div class="w-24 h-24 rounded-full p-1 bg-gradient-to-tr from-yellow-400 via-indigo-500 to-purple-600 relative">
+                                <div class="absolute inset-0 rounded-full border border-white/20 animate-ping opacity-25"></div>
+                                <div class="w-full h-full bg-[#050508] rounded-full flex items-center justify-center border-2 border-[#050508] overflow-hidden">
+                                    <span class="text-3xl font-black text-white">${top3[idx].name.charAt(0)}</span>
+                                </div>
+                            </div>
+                            <div class="absolute -top-2 -right-2 bg-indigo-500 text-[10px] font-black px-2 py-0.5 rounded-md shadow-lg">TOP ${rank}</div>
+                        </div>
+                        <div class="${height} w-full glass-panel ${borderColor} rounded-2xl flex flex-col items-center justify-end pb-6 pt-12 px-4 text-center ${isFirst ? 'premium-glow bg-indigo-500/5' : ''}">
+                            <h3 class="font-black text-white text-lg uppercase tracking-tighter truncate w-full">${top3[idx].name}</h3>
+                            <div class="mt-2 px-4 py-1.5 bg-white/5 rounded-full border border-white/10">
+                                <span class="text-xs font-mono font-bold text-indigo-400">${top3[idx].points.toLocaleString()} XP</span>
+                            </div>
+                        </div>
+                    </div>`;
+            });
+
+            const maxPoints = list[0]?.points || 1;
+            list.slice(3).forEach((s, i) => {
+                const percentage = (s.points / maxPoints) * 100;
+                listEl.innerHTML += `
+                    <div class="stagger-item flex items-center gap-6 p-4 mx-4 my-2 rounded-2xl border border-white/5 bg-white/[0.01] hover:bg-white/[0.04] transition-all hover:translate-x-2" style="animation-delay: ${i * 0.1}s">
+                        <div class="w-12 h-12 flex items-center justify-center bg-black/40 rounded-xl border border-white/5">
+                            <span class="rank-number font-black text-xl">#${i+4}</span>
+                        </div>
+                        <div class="flex-1">
+                            <div class="flex justify-between items-center mb-1.5">
+                                <span class="text-sm font-extrabold text-gray-200">${s.name}</span>
+                                <span class="text-[11px] font-mono font-bold text-gray-400">${s.points.toLocaleString()} XP</span>
+                            </div>
+                            <div class="relative h-2 w-full bg-white/5 rounded-full overflow-hidden">
+                                <div class="absolute inset-y-0 left-0 bg-gradient-to-r from-indigo-600 to-pink-500 shadow-[0_0_10px_rgba(99,102,241,0.5)]" style="width: ${percentage}%"></div>
+                            </div>
+                        </div>
+                    </div>`;
+            });
+        }
+
+        function refreshChart(labels, points) {
+            const ctx = document.getElementById('growthChart').getContext('2d');
+            if (myChart) myChart.destroy();
+            myChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels.length ? labels : ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+                    datasets: [{
+                        data: points.length ? points : [45, 52, 38, 65, 48, 70, 62],
+                        borderColor: '#6366f1',
+                        borderWidth: 4,
+                        pointBackgroundColor: '#6366f1',
+                        tension: 0.4,
+                        fill: true,
+                        backgroundColor: (c) => {
+                            const g = c.chart.ctx.createLinearGradient(0, 0, 0, 400);
+                            g.addColorStop(0, 'rgba(99, 102, 241, 0.2)');
+                            g.addColorStop(1, 'transparent');
+                            return g;
+                        }
+                    }]
+                },
+                options: {
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        y: { grid: { color: 'rgba(255,255,255,0.03)' }, ticks: { color: '#475569' } },
+                        x: { grid: { display: false }, ticks: { color: '#475569' } }
+                    }
+                }
+            });
+        }
+
+async function save() {
+    const saveBtn = document.getElementById('saveBtn');
+    const originalText = saveBtn.innerText;
+    
+    const guildId = document.getElementById('guildId').value;
+    const channelId = document.getElementById('channelId').value;
+    const categoryId = document.getElementById('categoryId').value;
+    const panelTitle = document.getElementById('panelTitle').value;
+    const panelDesc = document.getElementById('panelDesc').value;
+    const panelImage = document.getElementById('panelImage').value;
+
+    if (!guildId || !channelId) return alert("❌ Guild ID dan Channel ID wajib diisi!");
+
+    const options = [];
+    document.querySelectorAll('#opts > div').forEach(el => {
+        options.push({
+            type: el.querySelector('.type-select').value,
+            label: el.querySelector('.label').value,
+            value: el.querySelector('.value').value,
+            question: el.querySelector('.ques').value,
+            transcriptId: el.querySelector('.transcriptId').value
+        });
+    });
+
+    if (options.length === 0) return alert("❌ Tambahkan minimal satu module!");
+
+    saveBtn.innerText = "DEPLOYING...";
+    saveBtn.disabled = true;
+
+    try {
+        const response = await fetch('/api/save-config', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ 
+                guildId, channelId, categoryId, options, 
+                panelTitle, panelDesc, panelImage 
+            })
+        }); // <-- Pastikan tutup kurung ini ada
+
+        if (response.ok) {
+            alert("✅ Configuration deployed to Discord!");
+        } else {
+            const err = await response.text();
+            alert("❌ Error: " + err);
+        }
+    } catch (e) {
+        alert("❌ Failed to connect to server: " + e.message);
+    } finally {
+        saveBtn.innerText = originalText;
+        saveBtn.disabled = false;
+    }
+}
+
+// Tambahkan juga fungsi fetch data awal agar ID yang sudah tersimpan muncul otomatis
+async function loadStats() {
+    const res = await fetch('/api/stats');
+    const data = await res.json();
+    
+    if (data.firstGuildId) {
+        document.getElementById('guildId').value = data.firstGuildId;
+        document.getElementById('channelId').value = data.config.channelId || '';
+        document.getElementById('categoryId').value = data.config.categoryId || '';
+        
+        document.getElementById('opts').innerHTML = ''; // Bersihkan list
+        data.config.options.forEach(opt => addOpt(opt));
+    }
+}
+
+// Panggil fungsi load saat halaman dibuka
+window.onload = loadStats;
+function toggleSidebar() {
+    const sidebar = document.getElementById('sidebar');
+    const texts = document.querySelectorAll('.sidebar-text');
+    const icon = document.getElementById('toggleIcon');
+    
+    if (sidebar.classList.contains('w-72')) {
+        // Mode Kecil (Collapse)
+        sidebar.classList.replace('w-72', 'w-24');
+        texts.forEach(t => {
+            t.style.opacity = '0';
+            setTimeout(() => t.classList.add('hidden'), 300);
+        });
+        icon.style.transform = 'rotate(180deg)';
+    } else {
+        // Mode Besar (Expand)
+        sidebar.classList.replace('w-24', 'w-72');
+        texts.forEach(t => {
+            t.classList.remove('hidden');
+            setTimeout(() => t.style.opacity = '1', 50);
+        });
+        icon.style.transform = 'rotate(0deg)';
+    }
+}
+// Gabungkan semua inisialisasi di sini
+window.onload = () => {
+    resize(); 
+    initStars(); 
+    animateStars();
+    loadData(); // Ini akan memanggil stats, config, dan leaderboard sekaligus
+};
+    </script>
+</body>
+</html>
